@@ -10,6 +10,7 @@ import (
 	handler "github.com/mehditeymorian/etefagh/internal/handler/event"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"net/http"
 	"os"
@@ -28,9 +29,10 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host -
+// Main
+// @host http://localhost
 // @BasePath /api/v1
-func Main(config config.Config, logger *zap.Logger) {
+func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 
 	// create HTTP server
 	app := echo.New()
@@ -47,7 +49,11 @@ func Main(config config.Config, logger *zap.Logger) {
 	app.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// register events endpoints
-	handler.Event{Store: store.NewMongoEvent(database), Logger: logger}.Register(app.Group("/api/v1"))
+	handler.Event{
+		Store:  store.NewMongoEvent(database, tracer),
+		Logger: logger,
+		Tracer: tracer,
+	}.Register(app.Group("/api/v1"))
 
 	// start HTTP Server
 	if err := app.Start(fmt.Sprintf(":%s", config.Api.Port)); !errors.Is(err, http.ErrServerClosed) {

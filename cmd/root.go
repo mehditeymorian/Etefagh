@@ -6,6 +6,7 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/db"
 	"github.com/mehditeymorian/etefagh/internal/handler"
 	log "github.com/mehditeymorian/etefagh/internal/logger"
+	"github.com/mehditeymorian/etefagh/internal/telemetry"
 )
 
 func main() {
@@ -20,8 +21,16 @@ func main() {
 		Logger: log.Config{
 			Level: "debug",
 		},
+		Telemetry: telemetry.Config{
+			Trace: telemetry.Trace{
+				Enabled: true,
+				URL:     "http://localhost:6832",
+			},
+		},
 	}
 
 	logger := log.New(cfg.Logger)
-	server.Main(cfg, logger)
+
+	tracer := telemetry.New(cfg.Telemetry)
+	server.Main(cfg, logger, tracer)
 }

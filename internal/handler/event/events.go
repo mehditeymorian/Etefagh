@@ -7,6 +7,7 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/request"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -17,6 +18,7 @@ import (
 type Event struct {
 	Store  store.Event
 	Logger *zap.Logger
+	Tracer trace.Tracer
 }
 
 // RetrieveAll godoc
@@ -28,10 +30,12 @@ type Event struct {
 // @Success 200 {object} []model.Event
 // @Router /api/v1/events [get]
 func (e Event) RetrieveAll(c echo.Context) error {
+	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.RetrieveAll")
+	defer span.End()
 
 	// retrieve all events
 	// WARNING!!!!!! require limitation
-	all, err := e.Store.RetrieveAll(c.Request().Context())
+	all, err := e.Store.RetrieveAll(ctx)
 	if err != nil {
 		e.Logger.Warn("failed to retrieve all events from db",
 			zap.String("path", "/api/v1/events"),
@@ -64,9 +68,12 @@ func (e Event) RetrieveAll(c echo.Context) error {
 // @Success 200 {object} model.Event
 // @Router /api/v1/events/:event_id [get]
 func (e Event) Retrieve(c echo.Context) error {
+	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Retrieve")
+	defer span.End()
+
 	eventId := c.Param("event_id")
 
-	retrieve, err := e.Store.Retrieve(c.Request().Context(), eventId)
+	retrieve, err := e.Store.Retrieve(ctx, eventId)
 	if err != nil {
 		e.Logger.Warn("failed to retrieve an event from db",
 			zap.String("event_id", eventId),
@@ -106,6 +113,8 @@ func (e Event) Retrieve(c echo.Context) error {
 // @Success 200 {string} "HEX ID"
 // @Router /api/v1/events [post]
 func (e Event) Create(c echo.Context) error {
+	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Create")
+	defer span.End()
 
 	var input request.Event
 	// read body
@@ -141,7 +150,7 @@ func (e Event) Create(c echo.Context) error {
 	}
 
 	// create event
-	id, err := e.Store.Create(c.Request().Context(), event)
+	id, err := e.Store.Create(ctx, event)
 	if err != nil {
 		e.Logger.Warn("failed to create event",
 			zap.String("path", "/api/v1/events"),
@@ -175,10 +184,13 @@ func (e Event) Create(c echo.Context) error {
 // @Success 201 {string} ""
 // @Router /api/v1/events/:event_id [delete]
 func (e Event) Delete(c echo.Context) error {
+	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Delete")
+	defer span.End()
+
 	eventId := c.Param("event_id")
 
 	// delete event
-	if err := e.Store.Delete(c.Request().Context(), eventId); err != nil {
+	if err := e.Store.Delete(ctx, eventId); err != nil {
 		e.Logger.Warn("failed to delete event with the given id",
 			zap.String("event_id", eventId),
 			zap.String("path", "/api/v1/events"),
