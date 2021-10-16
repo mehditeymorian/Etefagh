@@ -24,6 +24,9 @@ jobs:
     - name: Log
       run: ls && pwd
 
+    - name: Download Dependecies
+      run: go mod download 
+      
     - name: Build
       run: go build -v ./cmd/root.go
 
