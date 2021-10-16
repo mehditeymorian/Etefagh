@@ -1,0 +1,62 @@
+info:
+  contact: {}
+paths:
+  /api/v1/events:
+    get:
+      consumes:
+      - '*/*'
+      description: retrieves all events
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: retrieve all events
+      tags:
+      - Event
+    post:
+      consumes:
+      - '*/*'
+      description: creates an event
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: create an event
+      tags:
+      - Event
+  /api/v1/events/:event_id:
+    delete:
+      consumes:
+      - '*/*'
+      description: delete an event by id
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: ""
+      summary: delete an event
+      tags:
+      - Event
+    get:
+      consumes:
+      - '*/*'
+      description: retrieves an event by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: retrieve an event
+      tags:
+      - Event
+swagger: "2.0"
