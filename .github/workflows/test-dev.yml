@@ -21,11 +21,16 @@ jobs:
       with:
         go-version: 1.17
         
-    - name: log
+    - name: Log
       run: ls && pwd
 
     - name: Build
-      run: go build -v ./
+      run: go build -v ./cmd/root.go
 
     - name: Test
-      run: go test -v ./
+      run: go test -v ./... -covermode=atomic -coverprofile=coverage.out
+     
+    - name: Coverage
+      uses: codecov/codecov-action@v1
+      with:
+        files: coverage.out
