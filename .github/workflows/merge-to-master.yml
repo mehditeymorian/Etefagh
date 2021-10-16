@@ -1,0 +1,24 @@
+name: Merge to Master on Success
+
+on: # Triggers the workflow on push or pull request events but only for the master branch
+  workflow_run:
+    workflows: ["Test"]
+    types: ["completed"]
+
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+    if: ${{ github.events.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@master
+      
+      - name: Merge dev-ci -> master
+        uses: devmasx/merge-branch@v1.4.0
+        with:
+          type: now
+          from_branch: dev-ci
+          target_branch: master
+          github_token: ${{ github.token }}
+    
+    
+
