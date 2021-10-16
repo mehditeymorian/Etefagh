@@ -5,10 +5,11 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/config"
 	"github.com/mehditeymorian/etefagh/internal/db"
 	"github.com/mehditeymorian/etefagh/internal/handler"
+	log "github.com/mehditeymorian/etefagh/internal/logger"
 )
 
 func main() {
-	var config config.Config = config.Config{
+	var cfg config.Config = config.Config{
 		Api: handler.Config{
 			Port: "3000",
 		},
@@ -16,6 +17,11 @@ func main() {
 			Uri:  "mongodb://localhost:27017",
 			Name: "events",
 		},
+		Logger: log.Config{
+			Level: "debug",
+		},
 	}
-	server.Main(config)
+
+	logger := log.New(cfg.Logger)
+	server.Main(cfg, logger)
 }
