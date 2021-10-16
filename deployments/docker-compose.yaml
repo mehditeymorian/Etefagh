@@ -1,0 +1,16 @@
+---
+version: "3"
+services:
+  http-server:
+    build:
+      context: ..
+      dockerfile: ../../Dockerfile
+    image: etefagh
+    ports:
+      - 3000:3000
+    depends_on:
+      - database
+  database:
+    image: mongo:latest
+    ports:
+      - 27017:27017
