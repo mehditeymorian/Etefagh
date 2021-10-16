@@ -18,7 +18,7 @@ jobs:
           type: now
           from_branch: dev-ci
           target_branch: master
-          github_token: ${{ github.token }}
+          github_token: ${{ ACTION_ACCESS_TOKEN }}
     
     
 
