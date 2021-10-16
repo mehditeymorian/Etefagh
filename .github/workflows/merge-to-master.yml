@@ -4,6 +4,8 @@ on: # Triggers the workflow on push or pull request events but only for the mast
   workflow_run:
     workflows: ["Test"]
     types: ["completed"]
+    
+  workflow_dispatch:
 
 jobs:
   on-success:
