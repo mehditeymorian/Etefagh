@@ -10,7 +10,7 @@ on: # Triggers the workflow on push or pull request events but only for the mast
 jobs:
   on-success:
     runs-on: ubuntu-latest
-    if: ${{ github.events.workflow_run.conclusion == 'success' }}
+    if: ${{ github.events.workflow_run.conclusion == 'Success' }}
     steps:
       - uses: actions/checkout@master
       
