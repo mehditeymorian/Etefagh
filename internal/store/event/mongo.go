@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"time"
 )
 
 // MongoEvent hand
@@ -24,9 +23,6 @@ func NewMongoEvent(db *mongo.Database) *MongoEvent {
 }
 
 func (receiver *MongoEvent) Create(ctx context.Context, event model.Event) (interface{}, error) {
-
-	// add created datetime
-	event.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 
 	one, err := receiver.DB.Collection(collection).InsertOne(ctx, event)
 	if err != nil {

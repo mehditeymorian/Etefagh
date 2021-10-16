@@ -3,9 +3,11 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/mehditeymorian/etefagh/internal/model"
+	"github.com/mehditeymorian/etefagh/internal/request"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"time"
 )
 
 // Event events handler struct
@@ -52,25 +54,25 @@ func (e Event) Retrieve(c echo.Context) error {
 // Create an event
 func (e Event) Create(c echo.Context) error {
 
-	var event model.Event
+	var input request.Event
 	// read body
-	if err := c.Bind(&event); err != nil {
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// validate input
+	if err := input.Validate(); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// recreate event to avoid passing fields that should not be bindable
-	event = model.Event{
-		EventType:   event.EventType,
-		Description: event.Description,
-		Priority:    event.Priority,
-		Payload:     event.Payload,
-		CreatedAt:   0,
+	event := model.Event{
+		EventType:   input.EventType,
+		Description: input.Description,
+		Priority:    input.Priority,
+		Payload:     input.Payload,
+		CreatedAt:   primitive.NewDateTimeFromTime(time.Now()),
 		Id:          primitive.ObjectID{},
-	}
-
-	// validate input
-	if err := event.Validate(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	// create event
