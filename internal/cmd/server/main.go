@@ -22,7 +22,7 @@ func Main(config config.Config) {
 	// create a database connection
 	database, err := db.Connect(config.DB)
 	if err != nil {
-		panic(fmt.Sprintf("database initialization failed %w", err))
+		panic(fmt.Errorf("database initialization failed %w", err))
 	}
 
 	// register events endpoints
