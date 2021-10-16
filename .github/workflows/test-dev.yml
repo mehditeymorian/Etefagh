@@ -20,6 +20,9 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.17
+        
+    - name: log
+      run: ls && pwd
 
     - name: Build
       run: go build -v ./
