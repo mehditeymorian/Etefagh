@@ -5,6 +5,7 @@ on:
     branches: [ dev-ci ]
     
   workflow_dispatch:
+    
 
 jobs:
 
@@ -12,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: dev-ci
 
     - name: Set up Go
       uses: actions/setup-go@v2
