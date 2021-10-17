@@ -6,6 +6,7 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/db"
 	"github.com/mehditeymorian/etefagh/internal/handler"
 	log "github.com/mehditeymorian/etefagh/internal/logger"
+	"github.com/mehditeymorian/etefagh/internal/nats"
 	"github.com/mehditeymorian/etefagh/internal/telemetry"
 )
 
@@ -24,7 +25,7 @@ func main() {
 		Telemetry: telemetry.Config{
 			Trace: telemetry.Trace{
 				Enabled: true,
-				URL:     "http://localhost:6832",
+				Url:     "http://localhost:14268/api/traces",
 			},
 		},
 	}

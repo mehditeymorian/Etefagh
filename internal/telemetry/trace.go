@@ -17,7 +17,9 @@ func New(cfg Config) trace.Tracer {
 	var err error
 	// trace server is listening
 	if cfg.Enabled {
-		exporter, err = jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(cfg.URL + "/api/traces")))
+		//exporter, err = jaeger.New(jaeger.WithAgentEndpoint(jaeger.WithAgentHost(cfg.Agent.Host), jaeger.WithAgentPort(cfg.Agent.Port)))
+
+		exporter, err = jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(cfg.Url)))
 	} else {
 		// export traces to standard output
 		exporter, err = stdout.New(stdout.WithPrettyPrint())

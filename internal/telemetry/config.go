@@ -6,5 +6,5 @@ type Config struct {
 
 type Trace struct {
 	Enabled bool
-	URL     string
+	Url     string
 }
