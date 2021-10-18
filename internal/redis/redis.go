@@ -35,7 +35,7 @@ func Connect(config Config) Redis {
 func (r Redis) SetEventState(ctx context.Context, ackId string, state PublishState) error {
 	// TODO: Change This!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// no expiration,
-	err := r.Client.Set(ctx, ackId, state, 0).Err()
+	err := r.Client.Set(ctx, ackId, string(state), 0).Err()
 
 	if err != nil {
 		return fmt.Errorf("failed to set key-value=(%s,%s): %v", ackId, state, err)
