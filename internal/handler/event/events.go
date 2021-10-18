@@ -5,6 +5,7 @@ import (
 	_ "github.com/mehditeymorian/etefagh/docs"
 	"github.com/mehditeymorian/etefagh/internal/model"
 	"github.com/mehditeymorian/etefagh/internal/request"
+	"github.com/mehditeymorian/etefagh/internal/stan"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.opentelemetry.io/otel/trace"
@@ -19,6 +20,7 @@ type Event struct {
 	Store  store.Event
 	Logger *zap.Logger
 	Tracer trace.Tracer
+	Stan   stan.Stan
 }
 
 // RetrieveAll godoc
@@ -52,8 +54,8 @@ func (e Event) RetrieveAll(c echo.Context) error {
 	}
 
 	e.Logger.Info("Events Retrieved",
-		zap.String("path", "/api/v1/events"),
-		zap.String("method", "get"),
+		zap.String("method", c.Request().Method),
+		zap.String("path", c.Request().RequestURI),
 		zap.Int("count", len(all)),
 	)
 	return c.JSON(http.StatusOK, all)
@@ -98,8 +100,8 @@ func (e Event) Retrieve(c echo.Context) error {
 	}
 
 	e.Logger.Info("Event Retrieved",
-		zap.String("path", "/api/v1/events/:event_id"),
-		zap.String("method", "get"),
+		zap.String("method", c.Request().Method),
+		zap.String("path", c.Request().RequestURI),
 	)
 	return c.JSON(http.StatusOK, retrieve)
 }
@@ -116,12 +118,20 @@ func (e Event) Create(c echo.Context) error {
 	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Create")
 	defer span.End()
 
+	var publish bool
+	var publishType string
+	var subject string
+	echo.QueryParamsBinder(c).
+		Bool("publish", &publish).
+		String("publish_type", &publishType).
+		String("subject", &subject)
+
 	var input request.Event
 	// read body
 	if err := c.Bind(&input); err != nil {
 		e.Logger.Warn("failed to bind request body",
-			zap.String("path", "/api/v1/events"),
-			zap.String("method", "post"),
+			zap.String("method", c.Request().Method),
+			zap.String("path", c.Request().RequestURI),
 			zap.Int("status", http.StatusBadRequest),
 			zap.Error(err),
 		)
@@ -131,8 +141,8 @@ func (e Event) Create(c echo.Context) error {
 	// validate input
 	if err := input.Validate(); err != nil {
 		e.Logger.Warn("failed to validate request body",
-			zap.String("path", "/api/v1/events"),
-			zap.String("method", "post"),
+			zap.String("method", c.Request().Method),
+			zap.String("path", c.Request().RequestURI),
 			zap.Int("status", http.StatusBadRequest),
 			zap.Error(err),
 		)
@@ -153,21 +163,34 @@ func (e Event) Create(c echo.Context) error {
 	id, err := e.Store.Create(ctx, event)
 	if err != nil {
 		e.Logger.Warn("failed to create event",
-			zap.String("path", "/api/v1/events"),
-			zap.String("method", "post"),
+			zap.String("method", c.Request().Method),
+			zap.String("path", c.Request().RequestURI),
 			zap.Int("status", http.StatusInternalServerError),
 			zap.Error(err),
 		)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	// publish event
-
 	e.Logger.Info("Event Created",
-		zap.String("path", "/api/v1/events"),
-		zap.String("method", "post"),
+		zap.String("method", c.Request().Method),
+		zap.String("path", c.Request().RequestURI),
 		zap.Object("input", input),
 	)
+
+	// publish event
+	if publish {
+		err := e.Stan.Publish(ctx, stan.PublishType(publishType), subject, event)
+
+		if err != nil {
+			e.Logger.Warn("failed to publish event",
+				zap.String("method", c.Request().Method),
+				zap.String("path", c.Request().RequestURI),
+				zap.Int("status", http.StatusInternalServerError),
+				zap.Error(err),
+			)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	}
 
 	// return a struct with id field
 	return c.JSON(http.StatusOK, struct {
@@ -203,8 +226,8 @@ func (e Event) Delete(c echo.Context) error {
 
 	e.Logger.Info("Event Deleted",
 		zap.String("event_id", eventId),
-		zap.String("path", "/api/v1/events"),
-		zap.String("method", "post"),
+		zap.String("method", c.Request().Method),
+		zap.String("path", c.Request().RequestURI),
 	)
 	return c.JSON(http.StatusNoContent, "")
 }
