@@ -48,7 +48,7 @@ func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 	mongoStore := store.NewMongoEvent(database, tracer)
 
 	// create redis connection
-	redis := redis.Connect(config.Redis)
+	redis := redis.Connect(config.Redis, tracer)
 
 	// connect to stan
 	stanConn, err := stan.Connect(config.Nats)
@@ -56,6 +56,7 @@ func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 		Connection: stanConn,
 		Redis:      redis,
 		Store:      mongoStore,
+		Tracer:     tracer,
 	}
 
 	if err != nil {

@@ -8,12 +8,14 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/redis"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	"github.com/nats-io/stan.go"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Stan struct {
 	Connection stan.Conn
 	Redis      redis.Redis
 	Store      *store.MongoEvent
+	Tracer     trace.Tracer
 }
 
 // PublishType publish type of event
@@ -38,11 +40,15 @@ func Connect(config Config) (stan.Conn, error) {
 }
 
 // Publish an event to stan
-func (s Stan) Publish(ctx context.Context, publishType PublishType, subject string, event model.Event) error {
+func (s Stan) Publish(context context.Context, publishType PublishType, subject string, event model.Event) error {
+	ctx, span := s.Tracer.Start(context, "stan.publish")
+	defer span.End()
+
 	// publish synchronously
 	if publishType == Sync {
 		err := s.publishSync(subject, event)
 		if err != nil {
+			span.RecordError(err)
 			return fmt.Errorf("failed to publish synchronously: %w", err)
 		}
 
@@ -70,18 +76,21 @@ func (s Stan) Publish(ctx context.Context, publishType PublishType, subject stri
 	// publish event async
 	ackId, err := s.publishAsync(subject, event, ackHandler)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to publish asynchronously: %w", err)
 	}
 
 	// save ackId to event model
 	err = s.Store.UpdateAckId(ctx, event.Id.Hex(), ackId)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to store ackId: %w", err)
 	}
 
 	// cache publish state
 	err = s.Redis.SetEventState(ctx, ackId, redis.WaitingAck)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to set publish state: %w", err)
 	}
 

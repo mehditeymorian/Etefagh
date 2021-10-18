@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Redis struct {
 	Client *redis.Client
+	Tracer trace.Tracer
 }
 
 // PublishState async published events states
@@ -20,7 +22,7 @@ const (
 )
 
 // Connect create a connection to redis server
-func Connect(config Config) Redis {
+func Connect(config Config, tracer trace.Tracer) Redis {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     config.Address,
@@ -28,17 +30,21 @@ func Connect(config Config) Redis {
 		DB:       config.DB,
 	})
 
-	return Redis{Client: client}
+	return Redis{Client: client, Tracer: tracer}
 }
 
 // SetEventState set event state by ackId from stan
 func (r Redis) SetEventState(ctx context.Context, ackId string, state PublishState) error {
+	ctx, span := r.Tracer.Start(ctx, "redis.SetEventState")
+	defer span.End()
+
 	// TODO: Change This!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// no expiration,
 	err := r.Client.Set(ctx, ackId, string(state), 0).Err()
 
 	if err != nil {
-		return fmt.Errorf("failed to set key-value=(%s,%s): %v", ackId, state, err)
+		span.RecordError(err)
+		return fmt.Errorf("failed to set key-value=(%s,%s): %w", ackId, state, err)
 	}
 
 	return nil
@@ -46,8 +52,12 @@ func (r Redis) SetEventState(ctx context.Context, ackId string, state PublishSta
 
 // GetEventState get event state by ackId
 func (r Redis) GetEventState(ctx context.Context, ackId string) (string, error) {
+	ctx, span := r.Tracer.Start(ctx, "redis.GetEventState")
+	defer span.End()
+
 	result, err := r.Client.Get(ctx, ackId).Result()
 	if err == redis.Nil {
+		span.RecordError(err)
 		return "", fmt.Errorf("no state setted for %s", ackId)
 	}
 
