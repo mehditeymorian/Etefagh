@@ -10,13 +10,13 @@ type Redis struct {
 	Client *redis.Client
 }
 
-// EventState async published events states
-type EventState string
+// PublishState async published events states
+type PublishState string
 
 const (
-	WaitingAck EventState = "WAITING_ACK"
-	Published             = "PUBLISHED"
-	Failed                = "FAILED"
+	WaitingAck PublishState = "WAITING_ACK"
+	Published               = "PUBLISHED"
+	Failed                  = "FAILED"
 )
 
 // Connect create a connection to redis server
@@ -32,7 +32,7 @@ func Connect(config Config) Redis {
 }
 
 // SetEventState set event state by ackId from stan
-func (r Redis) SetEventState(ctx context.Context, ackId string, state EventState) error {
+func (r Redis) SetEventState(ctx context.Context, ackId string, state PublishState) error {
 	// TODO: Change This!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// no expiration,
 	err := r.Client.Set(ctx, ackId, state, 0).Err()
