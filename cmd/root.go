@@ -6,7 +6,8 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/db"
 	"github.com/mehditeymorian/etefagh/internal/handler"
 	log "github.com/mehditeymorian/etefagh/internal/logger"
-	"github.com/mehditeymorian/etefagh/internal/nats"
+	"github.com/mehditeymorian/etefagh/internal/redis"
+	"github.com/mehditeymorian/etefagh/internal/stan"
 	"github.com/mehditeymorian/etefagh/internal/telemetry"
 )
 
@@ -27,6 +28,17 @@ func main() {
 				Enabled: true,
 				Url:     "http://localhost:14268/api/traces",
 			},
+		},
+		Nats: stan.Config{
+			Url:         "http://localhost:4222",
+			ClusterName: "test-cluster",
+			ClientId:    "client1",
+		},
+
+		Redis: redis.Config{
+			Address:  "localhost:6379",
+			Password: "",
+			DB:       0,
 		},
 	}
 

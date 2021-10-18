@@ -8,6 +8,8 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/config"
 	"github.com/mehditeymorian/etefagh/internal/db"
 	handler "github.com/mehditeymorian/etefagh/internal/handler/event"
+	"github.com/mehditeymorian/etefagh/internal/redis"
+	stan "github.com/mehditeymorian/etefagh/internal/stan"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"go.opentelemetry.io/otel/trace"
@@ -42,7 +44,23 @@ func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 	if err != nil {
 		err := fmt.Errorf("database initialization failed %w", err)
 		logger.Fatal(err.Error())
-		panic(err)
+	}
+	mongoStore := store.NewMongoEvent(database, tracer)
+
+	// create redis connection
+	redis := redis.Connect(config.Redis)
+
+	// connect to stan
+	stanConn, err := stan.Connect(config.Nats)
+	stan := stan.Stan{
+		Connection: stanConn,
+		Redis:      redis,
+		Store:      mongoStore,
+	}
+
+	if err != nil {
+		err := fmt.Errorf("stan initalization failed: %w", err)
+		logger.Fatal(err.Error())
 	}
 
 	// register swagger
@@ -50,9 +68,10 @@ func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 
 	// register events endpoints
 	handler.Event{
-		Store:  store.NewMongoEvent(database, tracer),
+		Store:  mongoStore,
 		Logger: logger,
 		Tracer: tracer,
+		Stan:   stan,
 	}.Register(app.Group("/api/v1"))
 
 	// start HTTP Server
