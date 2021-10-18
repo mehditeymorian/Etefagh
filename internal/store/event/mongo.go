@@ -100,6 +100,7 @@ func (m *MongoEvent) UpdateAckId(ctx context.Context, eventId string, ackId stri
 	ctx, span := m.Tracer.Start(ctx, "store.events.UpdateAckId")
 	defer span.End()
 
+	// update ackId of the event by eventId
 	objectID, _ := primitive.ObjectIDFromHex(eventId)
 	_, err := m.DB.Collection(collection).UpdateOne(
 		ctx,

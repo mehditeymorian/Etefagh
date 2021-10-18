@@ -16,6 +16,7 @@ type Stan struct {
 	Store      *store.MongoEvent
 }
 
+// PublishType publish type of event
 type PublishType string
 
 const (
@@ -23,8 +24,10 @@ const (
 	Async             = "async"
 )
 
+// Connect to nats streaming
 func Connect(config Config) (stan.Conn, error) {
 
+	// connect to nats using cluster name, client id, and nats address
 	stanConn, err := stan.Connect(config.ClusterName, config.ClientId, stan.NatsURL(config.Url))
 
 	if err != nil {
@@ -34,20 +37,23 @@ func Connect(config Config) (stan.Conn, error) {
 	return stanConn, nil
 }
 
+// Publish an event to stan
 func (s Stan) Publish(ctx context.Context, publishType PublishType, subject string, event model.Event) error {
 	// publish synchronously
 	if publishType == Sync {
-
 		err := s.publishSync(subject, event)
 		if err != nil {
-			return fmt.Errorf("failed to publish synchronously: %v", err)
+			return fmt.Errorf("failed to publish synchronously: %w", err)
 		}
 
 		return nil
 	}
 
 	// publish asynchronously
+
+	// event ack handler
 	ackHandler := stan.AckHandler(func(ackId string, err error) {
+		// determine final state of ack
 		var publishState redis.PublishState
 		if err != nil {
 			publishState = redis.Failed
@@ -61,9 +67,10 @@ func (s Stan) Publish(ctx context.Context, publishType PublishType, subject stri
 		}
 	})
 
+	// publish event async
 	ackId, err := s.publishAsync(subject, event, ackHandler)
 	if err != nil {
-		return fmt.Errorf("failed to publish asynchronously: %v", err)
+		return fmt.Errorf("failed to publish asynchronously: %w", err)
 	}
 
 	// save ackId to event model
@@ -81,11 +88,13 @@ func (s Stan) Publish(ctx context.Context, publishType PublishType, subject stri
 	return nil
 }
 
+// publishSync publish event synchronously
 func (s Stan) publishSync(subject string, event model.Event) error {
 	if err := validateSubject(subject); err != nil {
 		return err
 	}
 
+	// convert events to bytes
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		return err
@@ -94,12 +103,13 @@ func (s Stan) publishSync(subject string, event model.Event) error {
 	return s.Connection.Publish(subject, bytes)
 }
 
-// PublishAsync publish an event asynchronously and return ackId
+// publishAsync publish an event asynchronously and return ackId
 func (s Stan) publishAsync(subject string, event model.Event, handler stan.AckHandler) (string, error) {
 	if err := validateSubject(subject); err != nil {
 		return "", err
 	}
 
+	// convert events to bytes
 	bytes, err := json.Marshal(event)
 	if err != nil {
 		return "", err
