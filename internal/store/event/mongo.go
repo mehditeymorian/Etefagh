@@ -105,7 +105,7 @@ func (m *MongoEvent) UpdateAckId(ctx context.Context, eventId string, ackId stri
 		ctx,
 		bson.M{"_id": objectID},
 		bson.D{
-			{"%set", bson.D{{"ack_id", ackId}}},
+			{"$set", bson.D{{"ack_id", ackId}}},
 		})
 
 	if err != nil {
