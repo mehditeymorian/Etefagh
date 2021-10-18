@@ -90,7 +90,28 @@ func (m *MongoEvent) Delete(ctx context.Context, eventId string) error {
 	if err != nil {
 		span.RecordError(err)
 
-		return fmt.Errorf("Error while deleting document: %w", err)
+		return fmt.Errorf("error while deleting document: %w", err)
+	}
+
+	return nil
+}
+
+func (m *MongoEvent) UpdateAckId(ctx context.Context, eventId string, ackId string) error {
+	ctx, span := m.Tracer.Start(ctx, "store.events.UpdateAckId")
+	defer span.End()
+
+	objectID, _ := primitive.ObjectIDFromHex(eventId)
+	_, err := m.DB.Collection(collection).UpdateOne(
+		ctx,
+		bson.M{"_id": objectID},
+		bson.D{
+			{"%set", bson.D{{"ack_id", ackId}}},
+		})
+
+	if err != nil {
+		span.RecordError(err)
+
+		return fmt.Errorf("error while updating ackId: %w", err)
 	}
 
 	return nil
