@@ -1,0 +1,54 @@
+---
+version: "3.3"
+services:
+  http-server:
+    build: ../../Etefagh/
+    image: etefagh
+    ports:
+      - 3000:3000
+    depends_on:
+      - nats
+      - stan
+      - db
+      - jaeger
+      - redis
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
+  nats:
+    image: nats
+    ports:
+      - 4222:4222
+      - 8222:8222
+      - 6222:6222
+  stan:
+    image: nats-streaming
+    command:
+      - -store
+      - file
+      - -ns
+      - nats://nats:4222
+      - -dir
+      - datastore
+    depends_on:
+      - nats
+    links:
+      - nats
+  redis:
+    image: redis
+    ports:
+      - 6379:6379

@@ -11,4 +11,5 @@ type Event interface {
 	Retrieve(ctx context.Context, eventId string) (*model.Event, error)
 	RetrieveAll(ctx context.Context) ([]model.Event, error)
 	Delete(ctx context.Context, eventId string) error
+	UpdateAckId(ctx context.Context, eventId string, ackId string) error
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"go.uber.org/zap/zapcore"
 )
 
 // Event model
@@ -12,6 +13,14 @@ type Event struct {
 	Description string `json:"description"`
 	Priority    int    `json:"priority"`
 	Payload     string `json:"payload"`
+}
+
+func (e Event) MarshalLogObject(encoder zapcore.ObjectEncoder) error {
+	encoder.AddString("event_type", e.EventType)
+	encoder.AddString("description", e.Description)
+	encoder.AddInt("priority", e.Priority)
+	encoder.AddString("payload", e.Payload)
+	return nil
 }
 
 // Validate event
