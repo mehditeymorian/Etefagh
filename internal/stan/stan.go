@@ -2,9 +2,9 @@ package stan
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/mehditeymorian/etefagh/internal/model"
+	eventpb "github.com/mehditeymorian/etefagh/internal/proto"
 	"github.com/mehditeymorian/etefagh/internal/redis"
 	store "github.com/mehditeymorian/etefagh/internal/store/event"
 	"github.com/nats-io/stan.go"
@@ -104,7 +104,7 @@ func (s Stan) publishSync(subject string, event model.Event) error {
 	}
 
 	// convert events to bytes
-	bytes, err := json.Marshal(event)
+	bytes, err := eventpb.Marshal(event, eventpb.Protobuf)
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (s Stan) publishAsync(subject string, event model.Event, handler stan.AckHa
 	}
 
 	// convert events to bytes
-	bytes, err := json.Marshal(event)
+	bytes, err := eventpb.Marshal(event, eventpb.Protobuf)
 	if err != nil {
 		return "", err
 	}

@@ -6,6 +6,7 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-redis/redis/v8 v8.11.4
+	github.com/golang/protobuf v1.5.2
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/nats-io/stan.go v0.10.0
 	github.com/swaggo/echo-swagger v1.0.0
@@ -17,6 +18,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.0.1
 	go.opentelemetry.io/otel/trace v1.0.1
 	go.uber.org/zap v1.19.1
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -60,6 +62,5 @@ require (
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

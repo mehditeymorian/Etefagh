@@ -1,0 +1,10 @@
+syntax = "proto3";
+package event;
+option go_package = "./internal/protobuf";
+//protoc --go_out=./  ./event.proto
+message Event {
+  string eventType = 1;
+  string description = 2;
+  int32 priority = 3;
+  string payload = 4;
+}
