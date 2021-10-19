@@ -1,7 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "contact": {},
+        "license": {}
     },
     "paths": {
         "/api/v1/events": {
@@ -21,7 +22,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": ""
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Event"
+                            }
                         }
                     }
                 }
@@ -42,7 +46,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.IdResponse"
                         }
                     }
                 }
@@ -65,7 +69,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": ""
+                            "$ref": "#/definitions/model.Event"
                         }
                     }
                 }
@@ -86,9 +90,102 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": ""
+                            "type": "body"
                         }
                     }
+                }
+            }
+        },
+        "/api/v1/events/:event_id/publish-state": {
+            "get": {
+                "description": "get publish state of event with asynchronous publish type by event id",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "get publish state of event",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.StateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/publish-state/:ack_id": {
+            "get": {
+                "description": "get publish state of event with asynchronous publish type by ack id",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Event"
+                ],
+                "summary": "get publish state of event",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.StateResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Event": {
+            "type": "object",
+            "properties": {
+                "ack_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "event_type": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.IdResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StateResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
                 }
             }
         }

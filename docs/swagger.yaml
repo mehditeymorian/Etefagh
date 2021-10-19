@@ -1,5 +1,36 @@
+definitions:
+  model.Event:
+    properties:
+      ack_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      event_type:
+        type: string
+      id:
+        type: string
+      payload:
+        type: string
+      priority:
+        type: integer
+    type: object
+  model.IdResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  model.StateResponse:
+    properties:
+      description:
+        type: string
+      state:
+        type: string
+    type: object
 info:
   contact: {}
+  license: {}
 paths:
   /api/v1/events:
     get:
@@ -12,7 +43,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: ""
+            items:
+              $ref: '#/definitions/model.Event'
+            type: array
       summary: retrieve all events
       tags:
       - Event
@@ -26,7 +59,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/model.IdResponse'
       summary: create an event
       tags:
       - Event
@@ -41,7 +74,7 @@ paths:
         "201":
           description: Created
           schema:
-            type: ""
+            type: body
       summary: delete an event
       tags:
       - Event
@@ -55,8 +88,40 @@ paths:
         "200":
           description: OK
           schema:
-            type: ""
+            $ref: '#/definitions/model.Event'
       summary: retrieve an event
+      tags:
+      - Event
+  /api/v1/events/:event_id/publish-state:
+    get:
+      consumes:
+      - '*/*'
+      description: get publish state of event with asynchronous publish type by event
+        id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StateResponse'
+      summary: get publish state of event
+      tags:
+      - Event
+  /api/v1/events/publish-state/:ack_id:
+    get:
+      consumes:
+      - '*/*'
+      description: get publish state of event with asynchronous publish type by ack
+        id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.StateResponse'
+      summary: get publish state of event
       tags:
       - Event
 swagger: "2.0"
