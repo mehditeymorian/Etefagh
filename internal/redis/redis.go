@@ -35,12 +35,12 @@ func Connect(config Config, tracer trace.Tracer) Redis {
 
 // SetEventState set event state by ackId from stan
 func (r Redis) SetEventState(ctx context.Context, ackId string, state PublishState) error {
-	ctx, span := r.Tracer.Start(ctx, "redis.SetEventState")
+	spanCtx, span := r.Tracer.Start(ctx, "redis.SetEventState")
 	defer span.End()
 
 	// TODO: Change This!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// no expiration,
-	err := r.Client.Set(ctx, ackId, string(state), 0).Err()
+	err := r.Client.Set(spanCtx, ackId, string(state), 0).Err()
 
 	if err != nil {
 		span.RecordError(err)

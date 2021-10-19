@@ -40,8 +40,8 @@ func Connect(config Config) (stan.Conn, error) {
 }
 
 // Publish an event to stan
-func (s Stan) Publish(context context.Context, publishType PublishType, subject string, event model.Event) error {
-	ctx, span := s.Tracer.Start(context, "stan.publish")
+func (s Stan) Publish(ctx context.Context, publishType PublishType, subject string, event model.Event) error {
+	spanCtx, span := s.Tracer.Start(ctx, "stan.publish")
 	defer span.End()
 
 	// publish synchronously
@@ -66,7 +66,7 @@ func (s Stan) Publish(context context.Context, publishType PublishType, subject 
 		} else {
 			publishState = redis.Published
 		}
-		err = s.Redis.SetEventState(ctx, ackId, publishState)
+		err = s.Redis.SetEventState(context.Background(), ackId, publishState)
 
 		if err != nil {
 			//TODO: log
@@ -81,14 +81,14 @@ func (s Stan) Publish(context context.Context, publishType PublishType, subject 
 	}
 
 	// save ackId to event model
-	err = s.Store.UpdateAckId(ctx, event.Id.Hex(), ackId)
+	err = s.Store.UpdateAckId(spanCtx, event.Id.Hex(), ackId)
 	if err != nil {
 		span.RecordError(err)
 		return fmt.Errorf("failed to store ackId: %w", err)
 	}
 
 	// cache publish state
-	err = s.Redis.SetEventState(ctx, ackId, redis.WaitingAck)
+	err = s.Redis.SetEventState(spanCtx, ackId, redis.WaitingAck)
 	if err != nil {
 		span.RecordError(err)
 		return fmt.Errorf("failed to set publish state: %w", err)

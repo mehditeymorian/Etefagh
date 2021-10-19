@@ -31,7 +31,7 @@ type Event struct {
 // @Tags Event
 // @Accept */*
 // @Produce json
-// @Success 200 {object} []model.Event
+// @Success 200 {array} model.Event
 // @Router /api/v1/events [get]
 func (e Event) RetrieveAll(c echo.Context) error {
 	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.RetrieveAll")
@@ -114,7 +114,7 @@ func (e Event) Retrieve(c echo.Context) error {
 // @Tags Event
 // @Accept */*
 // @Produce json
-// @Success 200 {string} "HEX ID"
+// @Success 200 {object} model.IdResponse
 // @Router /api/v1/events [post]
 func (e Event) Create(c echo.Context) error {
 	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Create")
@@ -192,21 +192,21 @@ func (e Event) Create(c echo.Context) error {
 			)
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+
+		e.Logger.Info("event published", zap.Object("event", input))
 	}
 
 	// return a struct with id field
-	return c.JSON(http.StatusOK, struct {
-		Id string `json:"id"`
-	}{Id: id.(primitive.ObjectID).Hex()})
+	return c.JSON(http.StatusOK, model.IdResponse{Id: id.(primitive.ObjectID).Hex()})
 }
 
 // Delete godoc
 // @Summary delete an event
-// @Description delete an event by id
+// @Description deletes an event by id
 // @Tags Event
 // @Accept */*
 // @Produce json
-// @Success 201 {string} ""
+// @Success 201 {body} struct{}
 // @Router /api/v1/events/:event_id [delete]
 func (e Event) Delete(c echo.Context) error {
 	ctx, span := e.Tracer.Start(c.Request().Context(), "handler.events.Delete")
@@ -218,8 +218,8 @@ func (e Event) Delete(c echo.Context) error {
 	if err := e.Store.Delete(ctx, eventId); err != nil {
 		e.Logger.Warn("failed to delete event with the given id",
 			zap.String("event_id", eventId),
-			zap.String("path", "/api/v1/events"),
-			zap.String("method", "post"),
+			zap.String("method", c.Request().Method),
+			zap.String("path", c.Request().RequestURI),
 			zap.Int("status", http.StatusInternalServerError),
 			zap.Error(err),
 		)

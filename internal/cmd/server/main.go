@@ -73,6 +73,7 @@ func Main(config config.Config, logger *zap.Logger, tracer trace.Tracer) {
 		Logger: logger,
 		Tracer: tracer,
 		Stan:   stan,
+		Redis:  redis,
 	}.Register(app.Group("/api/v1"))
 
 	// start HTTP Server

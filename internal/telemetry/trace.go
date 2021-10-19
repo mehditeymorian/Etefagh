@@ -26,7 +26,7 @@ func New(cfg Config) trace.Tracer {
 	}
 
 	if err != nil {
-		log.Fatalf("failed to initialize export pipeline: %v", err)
+		log.Fatalf("failed to initialize export pipeline: %w", err)
 	}
 
 	// use default resource and update server namespaceKey and nameKey
