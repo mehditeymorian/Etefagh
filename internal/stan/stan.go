@@ -33,7 +33,7 @@ func Connect(config Config) (stan.Conn, error) {
 	stanConn, err := stan.Connect(config.ClusterName, config.ClientId, stan.NatsURL(config.Url))
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to STAN %v", err)
+		return nil, fmt.Errorf("failed to connect to stan: %w", err)
 	}
 
 	return stanConn, nil
