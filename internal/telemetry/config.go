@@ -1,10 +1,10 @@
 package telemetry
 
 type Config struct {
-	Trace
+	Trace `yaml:"trace"`
 }
 
 type Trace struct {
-	Enabled bool
-	Url     string
+	Enabled bool   `yaml:"enabled"`
+	Url     string `yaml:"url"`
 }
