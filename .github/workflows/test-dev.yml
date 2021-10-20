@@ -1,13 +1,12 @@
 name: Test
 
 on:
+  
   push:
     branches: [ dev-ci ]
   pull_request:
-    branches: [ dev-ci ]
-    
-  workflow_dispatch:
-    
+    branches: [ dev ]
+  workflow_dispatch:  
 
 jobs:
 
