@@ -6,10 +6,16 @@ import (
 	"github.com/mehditeymorian/etefagh/internal/config"
 	log "github.com/mehditeymorian/etefagh/internal/logger"
 	"github.com/mehditeymorian/etefagh/internal/telemetry"
+	log2 "log"
 )
 
 func main() {
-	cfg := config.Default()
+	readConfig, err := config.ReadConfig()
+	if err != nil {
+		log2.Fatalf("failed to read config: %w", err)
+	}
+
+	cfg := *readConfig
 
 	fmt.Printf("%+v", cfg)
 

@@ -2,5 +2,5 @@ package handler
 
 // Config handlers configuration
 type Config struct {
-	Port string
+	Port string `yaml:"port"`
 }

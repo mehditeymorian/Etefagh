@@ -1,0 +1,19 @@
+api:
+  port: 3000
+db:
+  uri: mongodb://db:27017
+  name: events
+logger:
+  level: debug
+telemetry:
+  trace:
+    enabled: true
+    url: http://jaeger:14268/api/traces
+nats:
+  url: http://nats:4222
+  cluster_name: test-cluster
+  client_id: client1
+redis:
+  address: redis:6379
+  password:
+  db: 0

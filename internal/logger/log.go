@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Level string `json:"level"`
+	Level string `json:"level" yaml:"level"`
 }
 
 // New create a logger
