@@ -1,6 +1,6 @@
 # Etefagh
 Publishes events to Nats Streaming(STAN) synchornously and asynchronously. Cache events's publish-state using Redis and Store events using MongoDB.
-![Structure](https://github.com/mehditeymorian/Etefagh/blob/master/assets/ETEFAGH.jpg)
+![Structure](https://github.com/mehditeymorian/Etefagh/blob/main/assets/ETEFAGH.jpg)
 
 ### Event Model
 ```golang
