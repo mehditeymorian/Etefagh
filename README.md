@@ -29,3 +29,9 @@ Use [docker-compose.yaml](https://github.com/mehditeymorian/Etefagh/blob/master/
 - Up: `docker-compose -f PATH/deployments/docker-compose.yaml up --build`
 - Down: `docker-compose -f PATH/deployments/docker-compose.yaml down`
 
+
+### Links
+| Name      | Link |
+| ----------- | ----------- |
+| Jaeger      | localhost:16686       |
+| Swagger   | localhost:3000/swagger/index.html#/        |
