@@ -24,7 +24,7 @@ message Event {
 ```
 
 ### How to Run
-Use [docker-compose.yaml](https://github.com/mehditeymorian/Etefagh/blob/master/deployments/docker-compose.yaml) file to run containers.
+Use [docker-compose.yaml](https://github.com/mehditeymorian/Etefagh/blob/main/deployments/docker-compose.yaml) file to run containers.
 
 - Up: `docker-compose -f PATH/deployments/docker-compose.yaml up --build`
 - Down: `docker-compose -f PATH/deployments/docker-compose.yaml down`
