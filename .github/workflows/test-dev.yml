@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  
+  push:
+    branches: [ dev-ci ]
+  pull_request:
+    branches: [ dev ]
+  workflow_dispatch:  
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: dev-ci
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+        
+    - name: Log
+      run: ls && pwd
+
+    - name: Download Dependecies
+      run: go mod download 
+      
+    - name: Build
+      run: go build -v ./cmd/root.go
+
+    - name: Test
+      run: go test -v ./... -covermode=atomic -coverprofile=coverage.out
+     
+    - name: Coverage
+      uses: codecov/codecov-action@v1
+      with:
+        files: coverage.out
